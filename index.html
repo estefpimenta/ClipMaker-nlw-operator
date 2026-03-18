@@ -54,8 +54,13 @@
                 return false;
 
             },
-            getTranscription: () => {},
-            getViralMoment: () => {}
+            getTranscription: async () => {
+                const response = await fetch(app.transcriptionUrl);
+                return response.text();
+            },
+            getViralMoment: async () => {
+                const trasncription = await app.getTranscription()
+            }
         }
 
         const config = {
