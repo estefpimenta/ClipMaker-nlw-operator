@@ -36,21 +36,21 @@
 
                         if (response.ok) {
                             app.transcriptionUrl = url;
-                            cosole.log('Transcrição disponível:', url);
+                            console.log('Transcrição disponível:', url);
                             return true
                         }
 
                     } catch (error) {
                         console.error(`Tentativa ${attempt} falhou:`, error.message);
                     }
-
+                    
                     if (attempt < maxAttempts) {
                         await new Promise(resolve => setTimeout(resolve, delay));
 
                     }
                 }
 
-                cosole.log('Transcrição não disponível após várias tentativas.');
+                console.log('Transcrição não disponível após várias tentativas.');
                 return false;
 
             },
@@ -65,10 +65,12 @@
 
       const myWidget = cloudinary.createUploadWidget(
         config,
-        (error, result) => {
+        async (error, result) => {
           if (!error && result && result.event === "success") {
             console.log("Done! Here is the image info: ", result.info);
             app.public_id = result.info.public_id
+
+            const isReady = await app.waitForTranscription()
           }
         },
       );
