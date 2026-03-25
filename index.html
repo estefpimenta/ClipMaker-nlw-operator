@@ -23,8 +23,7 @@
         status: document.getElementById("status"),
         video: document.getElementById("video"),
         button: document.getElementById("uploadWidget"),
-        video: document.getElementById("video"),
-        apiInput: document.getElementById("apiKey")
+        apiKey: document.getElementById("apiKey")
       }
 
       const app = {
@@ -83,7 +82,7 @@
                   `;
 
           const headers = {
-            "x-goog-api-key": "AIzaSyDCbPDvRl4eOvvIMgOqJ9Q3-QDbXZhasxU",
+            "x-goog-api-key": el.apiKey.value,
             "Content-Type": "application/json",
           };
           const contents = [
@@ -152,7 +151,9 @@
 
               const viralMoment = await app.getViralMoment();
               const viralMomentUrl = `https://res.cloudinary.com/${config.cloudName}/video/upload/${viralMoment}/${app.public_id}.mp4`;
-              console.log({ viralMoment });
+              el.video.setAttribute("src", viralMomentUrl);
+
+
             } catch (error) {
               console.error({ error });
             }
@@ -160,9 +161,14 @@
         },
       );
 
-      document.getElementById("upload_widget").addEventListener(
+      el.button.addEventListener(
         "click",
         function () {
+          if (!el.apiKey.value) {
+            alert("Por favor, insira sua chave de API do Gemini primeiro");
+            el.apiKey.focus();
+            return;
+          }
           myWidget.open();
         },
         false,
