@@ -7,8 +7,10 @@
   </head>
   <body>
     <h1>ClipMaker</h1>
-
+    <input id="apiKey" type="text" placeholder="Coloque sua chave de API do Gemini"/>
     <button id="upload_widget" class="cloudinary-button">Upload files</button>
+    <p id="status"></p>
+    <video id="video" src=""></video>
 
     <script
       src="https://upload-widget.cloudinary.com/latest/global/all.js"
@@ -17,53 +19,55 @@
 
     <script type="text/javascript">
 
-        
-        const app = {
-            transcriptionUrl: '',
-            public_id: '',
-            waitForTranscription: async () => {
+      const el = {
+        status: document.getElementById("status"),
+        video: document.getElementById("video")
 
-                const maxAttempts = 30;
-                const delay = 2000; // 2 seconds
+      }
 
-                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                    const url = `https://res.cloudinary.com/${config.cloudName}/raw/upload/v${Date.now()}/${app.public_id}.transcript`;
+      const app = {
+        transcriptionUrl: "",
+        public_id: "",
+        waitForTranscription: async () => {
+          const maxAttempts = 30;
+          const delay = 2000; // 2 seconds
 
-                    try {
+          for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            const url = `https://res.cloudinary.com/${config.cloudName}/raw/upload/v${Date.now()}/${app.public_id}.transcript`;
 
-                        console.log(`Tentativa ${attempt}/${maxAttempts}: Verificando transcrição...`);
-                        const response = await fetch(url);
+            try {
+              console.log(
+                `Tentativa ${attempt}/${maxAttempts}: Verificando transcrição...`,
+              );
+              const response = await fetch(url);
 
-                        if (response.ok) {
-                            app.transcriptionUrl = url;
-                            console.log('Transcrição disponível:', url);
-                            return true
-                        }
+              if (response.ok) {
+                app.transcriptionUrl = url;
+                console.log("Transcrição disponível:", url);
+                return true;
+              }
+            } catch (error) {
+              console.error(`Tentativa ${attempt} falhou:`, error.message);
+            }
 
-                    } catch (error) {
-                        console.error(`Tentativa ${attempt} falhou:`, error.message);
-                    }
-                    
-                    if (attempt < maxAttempts) {
-                        await new Promise(resolve => setTimeout(resolve, delay));
+            if (attempt < maxAttempts) {
+              await new Promise((resolve) => setTimeout(resolve, delay));
+            }
+          }
 
-                    }
-                }
+          console.log("Transcrição não disponível após várias tentativas.");
+          return false;
+        },
+        getTranscription: async () => {
+          const response = await fetch(app.transcriptionUrl);
+          return response.text();
+        },
+        getViralMoment: async () => {
+          const transcription = await app.getTranscription();
+          const model = "gemini-3-flash-preview";
+          const endpointGemini = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-                console.log('Transcrição não disponível após várias tentativas.');
-                return false;
-
-            },
-            getTranscription: async () => {
-                const response = await fetch(app.transcriptionUrl);
-                return response.text();
-            },
-            getViralMoment: async () => {
-                const transcription = await app.getTranscription()
-                const model = 'gemini-3-flash-preview'
-                const endpointGemini = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
-                
-                const prompt = `
+          const prompt = `
                   Role: You are a professional video editor specializing in viral content.
                   Task: Analyze the transcription below and identify the most engaging, funny, or surprising segment.
                   Constraints:
@@ -74,62 +78,82 @@
 
                   Transcription:
                   ${transcription}
-                  `
-              
+                  `;
 
-                const headers = {
-                  'x-goog-api-key': '$GEMINI_API_KEY',
-                  'Content-Type': 'application/json'
-                }
-                const contents = [
-                  {
-                    parts: [
-                      {
-                        text: prompt
-                      }
-                    ]
-                  }
-                ]
+          const headers = {
+            "x-goog-api-key": "AIzaSyDCbPDvRl4eOvvIMgOqJ9Q3-QDbXZhasxU",
+            "Content-Type": "application/json",
+          };
+          const contents = [
+            {
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
+            },
+          ];
 
-                const response = await fetch(endpointGemini, {
-                  method: 'POST',
-                  headers,
-                  body: JSON.stringify({
-                    contents
-                  })
-                })
-                
-                const data = await response.json()
-                console.log({data})
+          const maxAttempts = 3;
+          const delay = 1500;
+
+          for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+              const response = await fetch(endpointGemini, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                  contents,
+                }),
+              });
+
+              if (!response.ok) {
+                throw new Error(`HTTP: ${response.status}`);
+              }
+
+              const data = await response.json();
+              const rawText = data.candidates[0].content.parts[0].text
+              return rawText.replace(/```/g, "").replace(/json/g, "").trim();
+
+            } catch (error) {
+              const isLastAttempt = attempt === maxAttempts;
+              console.error(
+                `Gemini falhou tentativa ${attempt}/${maxAttempts}:`,
+                error.message,
+              );
+              if (isLastAttempt) {
+                throw error;
+              }
+              await new Promise((resolve) => setTimeout(resolve, delay));
             }
-        }
+          }
+        },
+      };
 
-        const config = {
-            cloudName: 'drbmooarp',
-            uploadPreset: 'upload_nlw'
-        }
+      const config = {
+        cloudName: "drbmooarp",
+        uploadPreset: "upload_nlw",
+      };
 
       const myWidget = cloudinary.createUploadWidget(
         config,
         async (error, result) => {
           if (!error && result && result.event === "success") {
             console.log("Done! Here is the image info: ", result.info);
-            app.public_id = result.info.public_id
-
+            app.public_id = result.info.public_id;
 
             try {
-              const isReady = await app.waitForTranscription()
-              if(!isReady) {
-                 throw new Error('Transcrição não disponível')
+              const isReady = await app.waitForTranscription();
+              if (!isReady) {
+                throw new Error("Transcrição não disponível");
               }
 
-              const viralMoment = await app.getViralMoment()
-
+              const viralMoment = await app.getViralMoment();
+              const viralMomentUrl = `https://res.cloudinary.com/${config.cloudName}/video/upload/${viralMoment}/${app.public_id}.mp4`;
+              console.log({ viralMoment });
             } catch (error) {
-              console.error( {error} );
+              console.error({ error });
             }
-
-            
           }
         },
       );
@@ -142,6 +166,5 @@
         false,
       );
     </script>
-
   </body>
 </html>
