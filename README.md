@@ -1,6 +1,6 @@
 # ClipMaker 🎬✨
 
-Este projeto foi desenvolvido durante a **:contentReference[oaicite:0]{index=0} (NLW-22)** da :contentReference[oaicite:1]{index=1}.
+Este projeto foi desenvolvido durante o ebentoevento <nlw/> OPERATOR (NLW-22) da Rocketseat.
 
 O **ClipMaker** é uma aplicação web que utiliza **Inteligência Artificial** para transformar vídeos longos em **clips curtos e virais automaticamente**, identificando os momentos mais relevantes com base na transcrição do conteúdo.
 
@@ -50,15 +50,6 @@ Construir uma aplicação moderna e funcional capaz de:
 - Uso de prompt engineering para extrair dados estruturados
 - Transformação de texto em decisões automatizadas (corte de vídeo)
 - Integração de IA em tempo real dentro de uma aplicação web
-
----
-
-### ✔️ UX e Design de Interfaces Modernas
-- Aplicação de **Glassmorphism**
-- Uso de **gradientes inspirados no TikTok**
-- Microinterações com `hover`, `scale` e animações suaves
-- Feedback visual de status (loading, processamento, sucesso/erro)
-- Hierarquia tipográfica e espaçamento com escala 8pt
 
 ---
 
