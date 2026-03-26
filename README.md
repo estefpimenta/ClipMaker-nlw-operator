@@ -78,11 +78,10 @@ Construir uma aplicação moderna e funcional capaz de:
 
 ---
 
-## 🚀 Como executar o projeto
+### 🔗 Links
 
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/clipmaker.git
+- 💻 **Projeto Online**  
+    https://estefpimenta.github.io/ClipMaker-nlw-operator/
 
 
-https://estefpimenta.github.io/ClipMaker-nlw-operator/
+
