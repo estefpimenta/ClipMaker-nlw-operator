@@ -10,7 +10,7 @@
     <input id="apiKey" type="text" placeholder="Coloque sua chave de API do Gemini"/>
     <button id="uploadWidget" class="cloudinary-button">Upload files</button>
     <p id="status"></p>
-    <video id="video" src=""></video>
+    <video id="video" src="" controls width="600" style="display: none;"></video>
 
     <script
       src="https://upload-widget.cloudinary.com/latest/global/all.js"
@@ -31,7 +31,7 @@
         public_id: "",
         waitForTranscription: async () => {
           const maxAttempts = 30;
-          const delay = 2000; // 2 seconds
+          const delay = 2000;
 
           for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             const url = `https://res.cloudinary.com/${config.cloudName}/raw/upload/v${Date.now()}/${app.public_id}.transcript`;
@@ -149,10 +149,12 @@
                 throw new Error("Transcrição não disponível");
               }
 
-              const viralMoment = await app.getViralMoment();
+              const viralMoment = "so_10,eo_20"; 
+              // await app.getViralMoment();
               const viralMomentUrl = `https://res.cloudinary.com/${config.cloudName}/video/upload/${viralMoment}/${app.public_id}.mp4`;
               el.video.setAttribute("src", viralMomentUrl);
-
+              el.video.style.display = "block";
+              el.video.load();
 
             } catch (error) {
               console.error({ error });
